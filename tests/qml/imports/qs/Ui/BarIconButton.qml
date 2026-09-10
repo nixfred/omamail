@@ -16,5 +16,11 @@ Item {
   property bool active: false
   property color foreground: Qt.rgba(1, 1, 1, 1)
   signal pressed(int button)
+  Loader {
+    anchors.centerIn: parent
+    width: parent.opticalSize
+    height: parent.opticalSize
+    sourceComponent: parent.iconComponent
+  }
   signal wheelMoved(int delta)
 }

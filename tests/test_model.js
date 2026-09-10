@@ -471,6 +471,8 @@ assert.strictEqual(model.badgeText(99), "99")
 assert.strictEqual(model.badgeText(100), "99+")
 assert.strictEqual(model.badgeText(1500, 99), "99+")
 assert.strictEqual(model.badgeText(-3), "")
+assert.strictEqual(model.listedUnreadFinished({ ids: ["next"], nextPageToken: "more" }, 500, false), false,
+  "500 listed messages is not an exact count while Gmail has another page")
 
 assert.strictEqual(model.barTooltip("ready", "me@example.com", 0), "me@example.com · No unread mail")
 assert.strictEqual(model.barTooltip("ready", "me@example.com", 1), "me@example.com · 1 unread message")
@@ -606,7 +608,7 @@ assert.strictEqual(model.listedUnreadFinished({
 }, 4, false), true)
 assert.strictEqual(model.listedUnreadFinished({
   ids: ["x"], nextPageToken: "more", estimate: 201
-}, 500, false), true, "stop once the badge has counted enough")
+}, 500, false), false, "keep paging until the actual unread total is known")
 
 // The foot of the window names the account and then its sync age, in a
 // form short enough to sit after an address.

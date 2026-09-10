@@ -87,15 +87,23 @@ BarWidget {
   implicitWidth: drawsIcon ? button.implicitWidth : 0
   implicitHeight: drawsIcon ? button.implicitHeight : 0
 
-  // The envelope stays; the number sits on its corner. Past 99 the exact
-  // value has stopped being information anyone acts on.
+  // Keep the actual unread message count on the logo, not an abbreviated 99+.
   readonly property string unreadBadge: {
     if (!root.gmail || !(root.gmail.unreadTotal > 0)) return ""
-    return Model.badgeText(root.gmail.unreadTotal)
+    return Model.badgeText(root.gmail.unreadTotal, Infinity)
+  }
+
+  TextMetrics {
+    id: badgeMetrics
+    font.family: Style.font.family
+    font.pixelSize: Style.space(10)
+    font.bold: true
+    text: root.unreadBadge
   }
 
   BarIconButton {
     id: button
+    slotSize: Math.max(Style.space(36), badgeMetrics.width + Style.space(18))
     visible: root.drawsIcon
     anchors.fill: parent
     bar: root.bar
@@ -119,12 +127,9 @@ BarWidget {
       Item {
         GmailIcon {
           anchors.centerIn: parent
-          iconSize: Style.space(12)
+          iconSize: Style.space(24)
           color: button.glyphColor
-          markColor: Color.accent
-          // The envelope stays; the unread total sits on its corner. An empty
-          // string is no overlay, which is how a zero count reaches "nothing
-          // waiting" without a permanent mark.
+          // Zero has no overlay; larger counts grow the slot, not an ellipsis.
           badge: button.unreadBadge
           crossed: !button.connected
         }

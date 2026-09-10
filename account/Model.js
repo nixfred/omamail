@@ -1192,8 +1192,6 @@ function unreadCount(list) {
 // SEARCH / query size there, and Gmail's resultSizeEstimate is a dummy
 // that is often 201 on a three-id page whether four messages match or
 // twenty thousand. `estimateExact` is that answer, from the provider.
-var UNREAD_LIST_CAP = 500
-
 function listedUnread(page, already, estimateExact) {
   var prior = Math.max(0, Math.floor(Number(already) || 0))
   if (!page) return prior
@@ -1207,7 +1205,7 @@ function listedUnread(page, already, estimateExact) {
 
 function listedUnreadFinished(page, total, estimateExact) {
   if (!page) return true
-  if (Math.max(0, Math.floor(Number(total) || 0)) >= UNREAD_LIST_CAP) return true
+
   if (!String(page.nextPageToken || "")) return true
   return estimateExact === true
 }

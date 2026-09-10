@@ -21,6 +21,7 @@ Item {
     property bool windowOpen: false
     property int unreadTotal: 3
     property string barTooltip: "Omamail"
+    property string contentDirection: ""
     property var barMessages: []
     property var barEvents: []
 
@@ -124,7 +125,20 @@ Item {
       fakeService.unreadTotal = 4
       compare(widget.unreadBadge, "4")
       fakeService.unreadTotal = 201
-      compare(widget.unreadBadge, "99+")
+      compare(widget.unreadBadge, "201")
+      fakeService.unreadTotal = 1500
+      compare(widget.unreadBadge, "1500")
+      var mark = findChild(widget, "gmailMark")
+      verify(mark !== null)
+      tryCompare(mark, "status", Image.Ready)
+      var label = findChild(widget, "unreadLabel")
+      compare(label.text, "1500")
+      verify(label.font.pixelSize >= 10)
+      fakeService.unreadTotal = 123456
+      verify(widget.implicitWidth >= label.implicitWidth + 12)
+      fakeService.ready = false
+      compare(findChild(widget, "disconnectedSlash").visible, true)
+      fakeService.ready = true
     }
   }
 }

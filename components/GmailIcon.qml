@@ -2,116 +2,66 @@ import QtQuick
 import qs.Commons
 import qs.Ui
 
-// The mark, drawn rather than rasterised from an SVG: the bar slot is about
-// 16px and Qt's SVG renderer smears strokes at that size.
-//
-// The fold is an M, not the V of a generic mail glyph — that is the whole
-// difference between this application's mark and every other envelope in the
-// bar. The frame follows the bar foreground. The M follows the theme accent.
+// Provider artwork keeps its brand colours; the unread overlay follows the
+// theme. Its width grows for the actual count instead of clipping neighbours.
 Item {
   id: root
 
-  property real iconSize: Style.font.icon
+  property real iconSize: Style.space(24)
   property color color: Color.foreground
-  property color markColor: color
   property color badgeColor: Color.urgent
-  // Digits on the corner of the envelope. Empty is no overlay.
   property string badge: ""
   property bool crossed: false
 
-  width: iconSize
+  width: Math.max(iconSize, badge !== "" ? unreadOverlay.width : 0)
   height: iconSize
-  implicitWidth: iconSize
-  implicitHeight: iconSize
+  implicitWidth: width
+  implicitHeight: height
 
-  onColorChanged: envelope.requestPaint()
-  onMarkColorChanged: envelope.requestPaint()
-  onIconSizeChanged: envelope.requestPaint()
-
-  Canvas {
-    id: envelope
-    anchors.fill: parent
-    antialiasing: true
-
-    onPaint: {
-      var ctx = getContext("2d")
-      ctx.reset()
-      var w = width
-      var h = height
-      if (w <= 0 || h <= 0) return
-
-      // The body is inset vertically so a wide-but-short envelope keeps the
-      // 3:2 proportion a letter actually has.
-      var left = w * 0.06
-      var right = w * 0.94
-      var top = h * 0.20
-      var bottom = h * 0.80
-      var stroke = Math.max(1, w * 0.085)
-
-      ctx.strokeStyle = root.color
-      ctx.lineWidth = stroke
-      ctx.lineJoin = "round"
-      ctx.lineCap = "round"
-
-      ctx.beginPath()
-      ctx.rect(left, top, right - left, bottom - top)
-      ctx.stroke()
-
-      // The M, inset inside the body: down the left stem, into the valley, back
-      // up, and down the right stem.
-      //
-      // Smaller and lighter than the frame around it. At bar size the two
-      // strokes at equal weight put more ink in a 12px square than it can hold,
-      // and the mark turns into a solid block; letting the M sit clear of the
-      // envelope on all four sides, at about two thirds the stroke, keeps both
-      // shapes readable.
-      var innerW = right - left
-      var innerH = bottom - top
-      ctx.strokeStyle = root.markColor
-      ctx.lineWidth = Math.max(1, stroke * 0.54)
-      ctx.beginPath()
-      ctx.moveTo(left + innerW * 0.30, bottom - innerH * 0.18)
-      ctx.lineTo(left + innerW * 0.30, top + innerH * 0.36)
-      ctx.lineTo(left + innerW * 0.50, top + innerH * 0.60)
-      ctx.lineTo(left + innerW * 0.70, top + innerH * 0.36)
-      ctx.lineTo(left + innerW * 0.70, bottom - innerH * 0.18)
-      ctx.stroke()
-    }
+  Image {
+    objectName: "gmailMark"
+    width: root.iconSize
+    height: root.iconSize
+    anchors.left: parent.left
+    source: "../assets/gmail.png"
+    sourceSize.width: Math.round(root.iconSize * 2)
+    fillMode: Image.PreserveAspectFit
+    smooth: true
   }
 
   Rectangle {
+    objectName: "disconnectedSlash"
     visible: root.crossed
-    anchors.centerIn: parent
-    width: parent.width * 1.22
-    height: Math.max(2, parent.height * 0.13)
+    x: 0
+    y: root.iconSize / 2
+    width: root.iconSize
+    height: Math.max(2, root.iconSize * 0.10)
     radius: height / 2
     color: root.color
     rotation: -45
   }
 
-  // On the corner rather than beside the icon, so the bar slot stays one
-  // square whether or not anything is waiting. A count is a pill; a single
-  // digit still reads as a badge rather than a second icon.
   BorderSurface {
+    id: unreadOverlay
+    objectName: "unreadOverlay"
     visible: root.badge !== ""
-    width: Math.max(height, badgeLabel.implicitWidth + Style.space(4))
-    height: Math.max(Style.space(8), parent.height * 0.58)
+    width: Math.max(height, badgeLabel.implicitWidth + Style.space(6))
+    height: Style.space(14)
     radius: height / 2
     color: root.badgeColor
     anchors.right: parent.right
-    anchors.rightMargin: -parent.width * 0.22
-    anchors.top: parent.top
-    anchors.topMargin: -parent.height * 0.22
+    anchors.bottom: parent.bottom
     borderSpec: Border.flat(Color.popups.background, 1)
 
     Text {
       id: badgeLabel
+      objectName: "unreadLabel"
       anchors.centerIn: parent
       text: root.badge
       textFormat: Text.PlainText
       color: Color.popups.background
       font.family: Style.font.family
-      font.pixelSize: Math.max(7, Math.round(root.iconSize * 0.42))
+      font.pixelSize: Style.space(10)
       font.bold: true
     }
   }
