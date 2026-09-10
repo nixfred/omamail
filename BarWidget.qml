@@ -127,7 +127,7 @@ BarWidget {
       Item {
         GmailIcon {
           anchors.centerIn: parent
-          iconSize: Style.space(24)
+          iconSize: Style.space(16)
           color: button.glyphColor
           // Zero has no overlay; larger counts grow the slot, not an ellipsis.
           badge: button.unreadBadge

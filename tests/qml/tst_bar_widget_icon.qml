@@ -75,6 +75,21 @@ Item {
       fakeService.applyCount = 0
     }
 
+    function test_compact_logo_keeps_the_unread_text_readable() {
+      fakeService.unreadTotal = 3
+      var mark = findChild(widget, "gmailMark")
+      verify(mark !== null)
+      compare(mark.width, 16, "match the neighbouring bar icons")
+      compare(mark.height, 16)
+      var label = findChild(widget, "unreadLabel")
+      compare(label.font.pixelSize, 10, "shrink the artwork, not the unread number")
+      compare(label.text, "3")
+      var pill = findChild(widget, "unreadOverlay")
+      compare(pill.x + pill.width - mark.width, 4, "offset the badge to leave the smaller brand visible")
+      compare(pill.y + pill.height - mark.height, 4)
+      verify(pill.x >= 0 && pill.x + pill.width <= mark.parent.width)
+    }
+
     function test_the_icon_is_drawn_by_default() {
       compare(widget.drawsIcon, true)
       compare(widget.visible, true)

@@ -13,8 +13,10 @@ Item {
   property string badge: ""
   property bool crossed: false
 
-  width: Math.max(iconSize, badge !== "" ? unreadOverlay.width : 0)
-  height: iconSize
+  // Reserve the badge's overhang inside our bounds, not in the next slot.
+  readonly property real badgeOffset: badge !== "" ? Style.space(4) : 0
+  width: Math.max(iconSize + badgeOffset, badge !== "" ? unreadOverlay.width : 0)
+  height: iconSize + badgeOffset
   implicitWidth: width
   implicitHeight: height
 
